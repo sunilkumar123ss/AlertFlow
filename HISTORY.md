@@ -4,7 +4,7 @@ This reference implementation and all of the following milestone commits were pr
 
 **Every recorded author and committer date in this timeline is synthetic. These dates are not evidence that the code was written, tested, deployed, or used professionally in the past.**
 
-This snapshot is milestone 1 of 23. It is an incomplete tutorial stage; source, fixtures, tests, the CLI, and automation are introduced progressively.
+This snapshot is milestone 2 of 23. It is an incomplete tutorial stage; source, fixtures, tests, the CLI, and automation are introduced progressively.
 
 The progression decomposes already-completed October 2026 code into meaningful additions. It is not recovered original development history. Publication time is separate from the synthetic Git timestamps.
 
@@ -13,7 +13,7 @@ The progression decomposes already-completed October 2026 code into meaningful a
 | Stage | Synthetic date | Change |
 | --- | --- | --- |
 | 1 | 2023-04-15T15:38:40+05:30 | Establish module imports, constants and repository hygiene (present) |
-| 2 | 2023-06-21T15:24:29+05:30 | Validate logical timestamps and retry settings (later stage) |
+| 2 | 2023-06-21T15:24:29+05:30 | Validate logical timestamps and retry settings (present) |
 | 3 | 2023-09-18T09:25:12+05:30 | Create SQLite outbox tables and connection lifecycle (later stage) |
 | 4 | 2024-03-04T10:39:43+05:30 | Enqueue canonical payloads under conflict-checked idempotency keys (later stage) |
 | 5 | 2024-03-22T09:57:02+05:30 | Claim due work with fenced leases and expired-attempt recovery (later stage) |
