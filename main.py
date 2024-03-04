@@ -30,3 +30,14 @@ class Outbox:
         self.connection.executescript(SCHEMA)
 
     def close(self): self.connection.close()
+
+    def enqueue(self, key, payload, now=0):
+        natural(now, "now")
+        if not isinstance(key, str) or not key.strip(): raise ValueError("idempotency key is required")
+        if not isinstance(payload, dict): raise ValueError("payload must be an object")
+        encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        with self.connection:
+            self.connection.execute("INSERT OR IGNORE INTO outbox(id,payload,status,next_attempt) VALUES(?,?,'pending',?)", (key, encoded, now))
+            existing = self.connection.execute("SELECT payload FROM outbox WHERE id=?", (key,)).fetchone()
+            if existing["payload"] != encoded: raise ValueError("idempotency key reused with different payload")
+        return key
