@@ -41,3 +41,25 @@ class Outbox:
             existing = self.connection.execute("SELECT payload FROM outbox WHERE id=?", (key,)).fetchone()
             if existing["payload"] != encoded: raise ValueError("idempotency key reused with different payload")
         return key
+
+    def claim(self, now, limit=10, lease_seconds=10):
+        natural(now, "now"); natural(limit, "limit", 1); natural(lease_seconds, "lease_seconds", 1)
+        if limit > 1000: raise ValueError("batch limit cannot exceed 1000")
+        try:
+            self.connection.execute("BEGIN IMMEDIATE")
+            self.connection.execute("UPDATE outbox SET status='delivered',lease_until=NULL,last_error=NULL "
+                "WHERE status='processing' AND lease_until<=? AND id IN (SELECT id FROM receipts)", (now,))
+            self.connection.execute("UPDATE outbox SET status='dead',lease_until=NULL,last_error='lease expired after final attempt' "
+                "WHERE status='processing' AND lease_until<=? AND attempts>=?", (now,self.max_attempts))
+            rows = self.connection.execute("SELECT * FROM outbox WHERE attempts<? AND ((status='pending' AND next_attempt<=?) "
+                "OR (status='processing' AND lease_until<=?)) ORDER BY next_attempt,id LIMIT ?",
+                (self.max_attempts, now, now, limit)).fetchall()
+            claimed = []
+            for row in rows:
+                self.connection.execute("UPDATE outbox SET status='processing',attempts=attempts+1,lease_until=? WHERE id=?", (now+lease_seconds,row["id"]))
+                claimed.append(dict(self.connection.execute("SELECT * FROM outbox WHERE id=?", (row["id"],)).fetchone()))
+            self.connection.commit()
+            return claimed
+        except Exception:
+            self.connection.rollback()
+            raise
