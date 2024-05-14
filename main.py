@@ -63,3 +63,26 @@ class Outbox:
         except Exception:
             self.connection.rollback()
             raise
+
+    def deliver(self, message, now, outcome="success"):
+        natural(now, "now")
+        if outcome not in {"success", "failure", "accepted_then_crash"}: raise ValueError("unknown simulated transport outcome")
+        # Take the write lock before reading the lease so a second worker cannot
+        # reclaim it between validation and the receipt/acknowledgment writes.
+        with self.connection:
+            self.connection.execute("BEGIN IMMEDIATE")
+            row = self.connection.execute("SELECT * FROM outbox WHERE id=?", (message["id"],)).fetchone()
+            if row is None or row["status"] != "processing" or row["attempts"] != message["attempts"] or row["lease_until"] <= now:
+                raise ValueError("stale or expired claim")
+            receipt = self.connection.execute("SELECT id FROM receipts WHERE id=?", (row["id"],)).fetchone()
+            if receipt or outcome in {"success", "accepted_then_crash"}:
+                self.connection.execute("INSERT OR IGNORE INTO receipts VALUES (?,?)", (row["id"],now))
+                if outcome == "accepted_then_crash" and not receipt:
+                    return "accepted_without_ack"
+                self.connection.execute("UPDATE outbox SET status='delivered',lease_until=NULL,last_error=NULL WHERE id=?", (row["id"],))
+                return "delivered"
+            status = "dead" if row["attempts"] >= self.max_attempts else "pending"
+            retry_at = now + self.base_delay * (2 ** (row["attempts"] - 1))
+            self.connection.execute("UPDATE outbox SET status=?,next_attempt=?,lease_until=NULL,last_error='synthetic transport failure' WHERE id=?",
+                                    (status,retry_at,row["id"]))
+            return status
