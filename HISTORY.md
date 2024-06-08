@@ -4,7 +4,7 @@ This reference implementation and all of the following milestone commits were pr
 
 **Every recorded author and committer date in this timeline is synthetic. These dates are not evidence that the code was written, tested, deployed, or used professionally in the past.**
 
-This snapshot is milestone 6 of 23. It is an incomplete tutorial stage; source, fixtures, tests, the CLI, and automation are introduced progressively.
+This snapshot is milestone 7 of 23. It is an incomplete tutorial stage; source, fixtures, tests, the CLI, and automation are introduced progressively.
 
 The progression decomposes already-completed October 2026 code into meaningful additions. It is not recovered original development history. Publication time is separate from the synthetic Git timestamps.
 
@@ -18,7 +18,7 @@ The progression decomposes already-completed October 2026 code into meaningful a
 | 4 | 2024-03-04T10:39:43+05:30 | Enqueue canonical payloads under conflict-checked idempotency keys (present) |
 | 5 | 2024-03-22T09:57:02+05:30 | Claim due work with fenced leases and expired-attempt recovery (present) |
 | 6 | 2024-05-14T10:45:07+05:30 | Record synthetic receipts, acknowledgments and bounded retry transitions (present) |
-| 7 | 2024-06-08T14:35:04+05:30 | Expose queue state and local delivery receipts (later stage) |
+| 7 | 2024-06-08T14:35:04+05:30 | Expose queue state and local delivery receipts (present) |
 | 8 | 2024-07-01T11:31:50+05:30 | Replay deterministic delivery outcomes and logical times (later stage) |
 | 9 | 2024-09-04T12:06:44+05:30 | Add synthetic fixtures for the documented example (later stage) |
 | 10 | 2024-09-15T11:22:38+05:30 | Expose the command-line interface and default demonstration (later stage) |

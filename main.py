@@ -86,3 +86,7 @@ class Outbox:
             self.connection.execute("UPDATE outbox SET status=?,next_attempt=?,lease_until=NULL,last_error='synthetic transport failure' WHERE id=?",
                                     (status,retry_at,row["id"]))
             return status
+
+    def snapshot(self):
+        return {"messages": [dict(row) for row in self.connection.execute("SELECT id,status,attempts,next_attempt,lease_until,last_error FROM outbox ORDER BY id")],
+                "receipts": [dict(row) for row in self.connection.execute("SELECT * FROM receipts ORDER BY id")]}
