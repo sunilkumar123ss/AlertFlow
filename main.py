@@ -90,3 +90,24 @@ class Outbox:
     def snapshot(self):
         return {"messages": [dict(row) for row in self.connection.execute("SELECT id,status,attempts,next_attempt,lease_until,last_error FROM outbox ORDER BY id")],
                 "receipts": [dict(row) for row in self.connection.execute("SELECT * FROM receipts ORDER BY id")]}
+
+
+def simulate(request):
+    if not isinstance(request, dict) or not isinstance(request.get("messages"), list): raise ValueError("input needs messages")
+    times = request.get("times", [0,5,10,15,20])
+    if not isinstance(times, list) or any(type(t) is not int or t < 0 for t in times) or times != sorted(set(times)):
+        raise ValueError("times must be unique increasing non-negative integers")
+    outcomes = request.get("outcomes", {})
+    if not isinstance(outcomes, dict) or any(not isinstance(v,list) or not v or any(o not in {"success","failure","accepted_then_crash"} for o in v) for v in outcomes.values()):
+        raise ValueError("invalid outcome schedule")
+    box = Outbox()
+    events = []
+    try:
+        for message in request["messages"]: box.enqueue(message["id"], message["payload"])
+        for now in times:
+            for message in box.claim(now):
+                schedule = outcomes.get(message["id"], ["success"])
+                outcome = schedule[min(message["attempts"]-1, len(schedule)-1)]
+                events.append({"time":now,"id":message["id"],"result":box.deliver(message,now,outcome)})
+        return dict(box.snapshot(), events=events, transport="local synthetic receipt table; no messages sent")
+    finally: box.close()
