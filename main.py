@@ -111,3 +111,14 @@ def simulate(request):
                 events.append({"time":now,"id":message["id"],"result":box.deliver(message,now,outcome)})
         return dict(box.snapshot(), events=events, transport="local synthetic receipt table; no messages sent")
     finally: box.close()
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input", type=Path, default=Path(__file__).with_name("example.json"))
+    args = parser.parse_args()
+    try: print(json.dumps(simulate(json.loads(args.input.read_text())), indent=2))
+    except (ValueError, OSError, TypeError, KeyError, sqlite3.Error) as exc: parser.error(str(exc))
+
+
+if __name__ == "__main__": main()
