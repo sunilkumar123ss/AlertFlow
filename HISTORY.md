@@ -4,7 +4,7 @@ This reference implementation and all of the following milestone commits were pr
 
 **Every recorded author and committer date in this timeline is synthetic. These dates are not evidence that the code was written, tested, deployed, or used professionally in the past.**
 
-This snapshot is milestone 11 of 23. It is an incomplete tutorial stage; source, fixtures, tests, the CLI, and automation are introduced progressively.
+This snapshot is milestone 12 of 23. It is an incomplete tutorial stage; source, fixtures, tests, the CLI, and automation are introduced progressively.
 
 The progression decomposes already-completed October 2026 code into meaningful additions. It is not recovered original development history. Publication time is separate from the synthetic Git timestamps.
 
@@ -23,7 +23,7 @@ The progression decomposes already-completed October 2026 code into meaningful a
 | 9 | 2024-09-04T12:06:44+05:30 | Add synthetic fixtures for the documented example (present) |
 | 10 | 2024-09-15T11:22:38+05:30 | Expose the command-line interface and default demonstration (present) |
 | 11 | 2024-11-22T10:08:01+05:30 | Cover enqueue idempotency and conflict and establish the test harness (present) |
-| 12 | 2025-01-01T15:32:40+05:30 | Cover success has single receipt (later stage) |
+| 12 | 2025-01-01T15:32:40+05:30 | Cover success has single receipt (present) |
 | 13 | 2025-02-19T19:39:58+05:30 | Cover backoff then delivery (later stage) |
 | 14 | 2025-06-11T13:37:26+05:30 | Cover bounded retries dead letter (later stage) |
 | 15 | 2025-06-15T12:23:19+05:30 | Cover crash after accept recovers without duplicate (later stage) |
