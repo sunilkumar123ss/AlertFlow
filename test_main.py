@@ -20,3 +20,12 @@ class OutboxTests(unittest.TestCase):
         self.box.deliver(self.box.claim(0)[0],0)
         self.assertEqual(self.box.claim(1),[])
         self.assertEqual(len(self.box.snapshot()["receipts"]),1)
+
+    def test_backoff_then_delivery(self):
+        self.add()
+        self.box.deliver(self.box.claim(0)[0],0,"failure")
+        self.assertEqual(self.box.claim(4),[])
+        retry = self.box.claim(5)[0]
+        self.assertEqual(retry["attempts"],2)
+        self.box.deliver(retry,5)
+        self.assertEqual(self.box.snapshot()["messages"][0]["status"],"delivered")
