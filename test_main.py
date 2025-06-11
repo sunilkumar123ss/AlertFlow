@@ -29,3 +29,10 @@ class OutboxTests(unittest.TestCase):
         self.assertEqual(retry["attempts"],2)
         self.box.deliver(retry,5)
         self.assertEqual(self.box.snapshot()["messages"][0]["status"],"delivered")
+
+    def test_bounded_retries_dead_letter(self):
+        self.add()
+        for now in [0,5,15]: self.box.deliver(self.box.claim(now)[0],now,"failure")
+        row = self.box.snapshot()["messages"][0]
+        self.assertEqual((row["status"],row["attempts"]),("dead",3))
+        self.assertEqual(self.box.claim(100),[])
