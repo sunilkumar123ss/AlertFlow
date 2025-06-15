@@ -36,3 +36,12 @@ class OutboxTests(unittest.TestCase):
         row = self.box.snapshot()["messages"][0]
         self.assertEqual((row["status"],row["attempts"]),("dead",3))
         self.assertEqual(self.box.claim(100),[])
+
+    def test_crash_after_accept_recovers_without_duplicate(self):
+        self.add()
+        self.box.deliver(self.box.claim(0)[0],0,"accepted_then_crash")
+        self.assertEqual(self.box.snapshot()["messages"][0]["status"],"processing")
+        self.assertEqual(self.box.claim(10),[])
+        result = self.box.snapshot()
+        self.assertEqual(result["messages"][0]["status"],"delivered")
+        self.assertEqual(len(result["receipts"]),1)
