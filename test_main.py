@@ -45,3 +45,10 @@ class OutboxTests(unittest.TestCase):
         result = self.box.snapshot()
         self.assertEqual(result["messages"][0]["status"],"delivered")
         self.assertEqual(len(result["receipts"]),1)
+
+    def test_expired_claim_is_reissued_and_old_worker_refused(self):
+        self.add()
+        old = self.box.claim(0)[0]
+        new = self.box.claim(10)[0]
+        with self.assertRaises(ValueError): self.box.deliver(old,10)
+        self.box.deliver(new,10)

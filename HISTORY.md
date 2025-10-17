@@ -4,7 +4,7 @@ This reference implementation and all of the following milestone commits were pr
 
 **Every recorded author and committer date in this timeline is synthetic. These dates are not evidence that the code was written, tested, deployed, or used professionally in the past.**
 
-This snapshot is milestone 15 of 23. It is an incomplete tutorial stage; source, fixtures, tests, the CLI, and automation are introduced progressively.
+This snapshot is milestone 16 of 23. It is an incomplete tutorial stage; source, fixtures, tests, the CLI, and automation are introduced progressively.
 
 The progression decomposes already-completed October 2026 code into meaningful additions. It is not recovered original development history. Publication time is separate from the synthetic Git timestamps.
 
@@ -27,7 +27,7 @@ The progression decomposes already-completed October 2026 code into meaningful a
 | 13 | 2025-02-19T19:39:58+05:30 | Cover backoff then delivery (present) |
 | 14 | 2025-06-11T13:37:26+05:30 | Cover bounded retries dead letter (present) |
 | 15 | 2025-06-15T12:23:19+05:30 | Cover crash after accept recovers without duplicate (present) |
-| 16 | 2025-10-17T17:33:47+05:30 | Cover expired claim is reissued and old worker refused (later stage) |
+| 16 | 2025-10-17T17:33:47+05:30 | Cover expired claim is reissued and old worker refused (present) |
 | 17 | 2025-10-18T17:02:48+05:30 | Cover two connections do not claim same lease (later stage) |
 | 18 | 2025-11-11T19:24:07+05:30 | Cover expiry after final unacknowledged attempt is dead (later stage) |
 | 19 | 2025-11-20T13:01:16+05:30 | Cover invalid schedule rejected (later stage) |
