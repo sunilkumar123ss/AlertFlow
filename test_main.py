@@ -52,3 +52,14 @@ class OutboxTests(unittest.TestCase):
         new = self.box.claim(10)[0]
         with self.assertRaises(ValueError): self.box.deliver(old,10)
         self.box.deliver(new,10)
+
+    def test_two_connections_do_not_claim_same_lease(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = str(Path(directory)/"outbox.sqlite")
+            first, second = Outbox(path), Outbox(path)
+            try:
+                first.enqueue("a", {"demo":1})
+                self.assertEqual(len(first.claim(0)),1)
+                self.assertEqual(second.claim(0),[])
+            finally:
+                first.close(); second.close()
