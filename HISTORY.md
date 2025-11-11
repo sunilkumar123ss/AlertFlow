@@ -4,7 +4,7 @@ This reference implementation and all of the following milestone commits were pr
 
 **Every recorded author and committer date in this timeline is synthetic. These dates are not evidence that the code was written, tested, deployed, or used professionally in the past.**
 
-This snapshot is milestone 17 of 23. It is an incomplete tutorial stage; source, fixtures, tests, the CLI, and automation are introduced progressively.
+This snapshot is milestone 18 of 23. It is an incomplete tutorial stage; source, fixtures, tests, the CLI, and automation are introduced progressively.
 
 The progression decomposes already-completed October 2026 code into meaningful additions. It is not recovered original development history. Publication time is separate from the synthetic Git timestamps.
 
@@ -29,7 +29,7 @@ The progression decomposes already-completed October 2026 code into meaningful a
 | 15 | 2025-06-15T12:23:19+05:30 | Cover crash after accept recovers without duplicate (present) |
 | 16 | 2025-10-17T17:33:47+05:30 | Cover expired claim is reissued and old worker refused (present) |
 | 17 | 2025-10-18T17:02:48+05:30 | Cover two connections do not claim same lease (present) |
-| 18 | 2025-11-11T19:24:07+05:30 | Cover expiry after final unacknowledged attempt is dead (later stage) |
+| 18 | 2025-11-11T19:24:07+05:30 | Cover expiry after final unacknowledged attempt is dead (present) |
 | 19 | 2025-11-20T13:01:16+05:30 | Cover invalid schedule rejected (later stage) |
 | 20 | 2025-12-02T17:28:15+05:30 | Describe package metadata and default verification arguments (later stage) |
 | 21 | 2026-01-27T11:16:22+05:30 | Add the isolated test, demo and help verifier (later stage) |

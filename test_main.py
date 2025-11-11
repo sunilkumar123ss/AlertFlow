@@ -63,3 +63,12 @@ class OutboxTests(unittest.TestCase):
                 self.assertEqual(second.claim(0),[])
             finally:
                 first.close(); second.close()
+
+    def test_expiry_after_final_unacknowledged_attempt_is_dead(self):
+        box = Outbox(max_attempts=1)
+        try:
+            box.enqueue("a", {})
+            box.claim(0)
+            self.assertEqual(box.claim(10),[])
+            self.assertEqual(box.snapshot()["messages"][0]["status"],"dead")
+        finally: box.close()
