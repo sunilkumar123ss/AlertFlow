@@ -72,3 +72,9 @@ class OutboxTests(unittest.TestCase):
             self.assertEqual(box.claim(10),[])
             self.assertEqual(box.snapshot()["messages"][0]["status"],"dead")
         finally: box.close()
+
+    def test_invalid_schedule_rejected(self):
+        with self.assertRaises(ValueError): simulate({"messages":[],"times":[10,0]})
+
+
+if __name__ == "__main__": unittest.main()
