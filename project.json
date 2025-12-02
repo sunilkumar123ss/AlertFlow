@@ -1,0 +1,8 @@
+{
+  "slug": "AlertFlow",
+  "title": "AlertFlow \u2014 Durable Outbox Simulator",
+  "description": "SQLite outbox with idempotency keys, fenced leases, exponential backoff, crash recovery and dead letters.",
+  "category": "cv",
+  "demo_args": [],
+  "expected_exit": 0
+}
