@@ -1,11 +1,44 @@
-# AlertFlow — Durable Outbox Simulator
+# AlertFlow
 
-> **Disclosed reconstruction prepared on 24 October 2026.** The recorded Git dates are synthetic, not dates of past development. See [HISTORY.md](HISTORY.md).
+**Inspect a durable outbox state machine without sending a single message.**
 
-This is an incomplete stage in a tutorial reconstruction of an already-completed reference implementation. Source, fixtures, tests, command-line behavior and verification are introduced in later stages. Only the final branch tip contains the complete documented package.
+AlertFlow uses SQLite to model queued delivery, idempotency keys, worker leases, exponential retry delays and dead letters. Its transport is a local receipt table. Synthetic success, failure and crash outcomes make otherwise difficult delivery scenarios reproducible.
 
-## Intended scope of the final example
+## Run
 
-SQLite outbox with idempotency keys, fenced leases, exponential backoff, crash recovery and dead letters.
+Python 3.9+ · standard library only.
 
-All examples are synthetic and educational. This reconstruction does not establish historical employment, deployment, usage, or production benchmarks.
+```sh
+python3 main.py
+python3 main.py --input example.json
+python3 main.py --help
+python3 -m unittest discover -s . -p 'test_main.py' -v
+```
+
+Default demo and help work from any working directory. The fixture is located beside the script. The CLI uses an in-memory database; `Outbox(database="/path/to/queue.sqlite")` uses a persistent local file. Explicit input paths follow the caller's working directory.
+
+## Delivery lifecycle
+
+`pending → processing → delivered` is the success path. A failed attempt returns to `pending` with delay `base_delay × 2^(attempts-1)`. The third failed attempt enters `dead`. A lease prevents another worker from claiming a processing item until it expires; the attempt number fences stale workers. Claiming and delivery validation take SQLite write locks before inspecting mutable state.
+
+An idempotency key accepts the same canonical JSON payload repeatedly, but rejects reuse with a changed payload. The receipt table accepts each key once. `accepted_then_crash` records a receipt while leaving the outbox unacknowledged; after lease expiry, recovery observes that receipt and marks the message delivered without another acceptance. A final attempt whose expired lease has no receipt becomes a dead letter.
+
+The demo leaves `demo-a`, `demo-b` and `demo-d` delivered, and `demo-c` dead after three failures. Its payloads reference fictional document IDs; there are no addresses or external destinations.
+
+## Tests and guarantees
+
+Nine tests cover enqueue idempotency, payload conflicts, single receipt delivery, retry timing, dead-letter transition, crash recovery, stale claims, two-connection lease exclusion and schedule validation.
+
+Receipt deduplication is a property of this **local simulator**. Real external transports require an idempotency contract or reconciliation to handle the crash between remote acceptance and local acknowledgment; the simulator does not prove exactly-once external delivery. Logical timestamps are supplied by the caller and must advance consistently. There is no background scheduler, notification provider, network connection or real message dispatch.
+
+## Scope
+
+This is a Python reference core; Java, Spring Batch and MySQL integration are not implemented. The local tests do not establish production throughput.
+
+## Repository checks
+
+```sh
+python3 verify.py
+```
+
+This runs the isolated test suite, synthetic example, and CLI help. The included GitHub Actions workflow repeats these checks when the repository is published. No hosted CI result is claimed by the local verification report.
