@@ -73,6 +73,48 @@ class OutboxTests(unittest.TestCase):
             self.assertEqual(box.snapshot()["messages"][0]["status"],"dead")
         finally: box.close()
 
+    def test_reduced_retry_limit_dead_letters_pending_after_restart(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = str(Path(directory)/"outbox.sqlite")
+            first = Outbox(path, max_attempts=5)
+            try:
+                first.enqueue("exhausted", {})
+                for now in [0,5,15]:
+                    first.deliver(first.claim(now)[0],now,"failure")
+                self.assertEqual(first.snapshot()["messages"][0]["status"],"pending")
+            finally: first.close()
+
+            restarted = Outbox(path, max_attempts=3)
+            try:
+                restarted.enqueue("fresh", {})
+                claimed = restarted.claim(100)
+                self.assertEqual([message["id"] for message in claimed],["fresh"])
+                restarted.deliver(claimed[0],100)
+                messages = {row["id"]: row for row in restarted.snapshot()["messages"]}
+                self.assertEqual((messages["exhausted"]["status"],messages["exhausted"]["attempts"]),("dead",3))
+                self.assertEqual(messages["exhausted"]["last_error"],"retry limit reached before claim")
+                self.assertEqual(messages["fresh"]["status"],"delivered")
+                self.assertEqual(restarted.claim(200),[])
+            finally: restarted.close()
+
+    def test_reduced_retry_limit_preserves_active_lease_after_restart(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = str(Path(directory)/"outbox.sqlite")
+            first = Outbox(path, max_attempts=5)
+            try:
+                first.enqueue("a", {})
+                first.deliver(first.claim(0)[0],0,"failure")
+                active = first.claim(5,lease_seconds=20)[0]
+            finally: first.close()
+
+            restarted = Outbox(path, max_attempts=1)
+            try:
+                self.assertEqual(restarted.claim(10),[])
+                self.assertEqual(restarted.snapshot()["messages"][0]["status"],"processing")
+                self.assertEqual(restarted.deliver(active,10),"delivered")
+                self.assertEqual(len(restarted.snapshot()["receipts"]),1)
+            finally: restarted.close()
+
     def test_invalid_schedule_rejected(self):
         with self.assertRaises(ValueError): simulate({"messages":[],"times":[10,0]})
 

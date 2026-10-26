@@ -51,6 +51,10 @@ class Outbox:
                 "WHERE status='processing' AND lease_until<=? AND id IN (SELECT id FROM receipts)", (now,))
             self.connection.execute("UPDATE outbox SET status='dead',lease_until=NULL,last_error='lease expired after final attempt' "
                 "WHERE status='processing' AND lease_until<=? AND attempts>=?", (now,self.max_attempts))
+            # A persisted queue can be reopened with a lower retry limit. Such
+            # pending rows must become terminal instead of remaining unclaimable.
+            self.connection.execute("UPDATE outbox SET status='dead',lease_until=NULL,last_error='retry limit reached before claim' "
+                "WHERE status='pending' AND attempts>=?", (self.max_attempts,))
             rows = self.connection.execute("SELECT * FROM outbox WHERE attempts<? AND ((status='pending' AND next_attempt<=?) "
                 "OR (status='processing' AND lease_until<=?)) ORDER BY next_attempt,id LIMIT ?",
                 (self.max_attempts, now, now, limit)).fetchall()

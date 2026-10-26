@@ -23,11 +23,13 @@ Default demo and help work from any working directory. The fixture is located be
 
 An idempotency key accepts the same canonical JSON payload repeatedly, but rejects reuse with a changed payload. The receipt table accepts each key once. `accepted_then_crash` records a receipt while leaving the outbox unacknowledged; after lease expiry, recovery observes that receipt and marks the message delivered without another acceptance. A final attempt whose expired lease has no receipt becomes a dead letter.
 
+When reopening a persistent queue with a lower `max_attempts`, the next claim moves pending messages that have already reached that limit to `dead`. Active leases remain valid until they expire; reducing the limit does not cancel an in-flight delivery. Configure workers sharing a queue with the same retry limit.
+
 The demo leaves `demo-a`, `demo-b` and `demo-d` delivered, and `demo-c` dead after three failures. Its payloads reference fictional document IDs; there are no addresses or external destinations.
 
 ## Tests and guarantees
 
-Nine tests cover enqueue idempotency, payload conflicts, single receipt delivery, retry timing, dead-letter transition, crash recovery, stale claims, two-connection lease exclusion and schedule validation.
+Tests cover enqueue idempotency, payload conflicts, single receipt delivery, retry timing, dead-letter transition, crash recovery, stale claims, two-connection lease exclusion, retry-limit changes across restarts and schedule validation.
 
 Receipt deduplication is a property of this **local simulator**. Real external transports require an idempotency contract or reconciliation to handle the crash between remote acceptance and local acknowledgment; the simulator does not prove exactly-once external delivery. Logical timestamps are supplied by the caller and must advance consistently. There is no background scheduler, notification provider, network connection or real message dispatch.
 
